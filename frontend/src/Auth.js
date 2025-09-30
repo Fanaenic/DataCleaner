@@ -9,7 +9,6 @@ const Auth = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Состояния для форм
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({
     name: '',
@@ -17,20 +16,10 @@ const Auth = ({ onLogin }) => {
     password: '',
     confirmPassword: ''
   });
-  const [passwordStrength, setPasswordStrength] = useState(0);
 
   const switchForm = (formName) => {
     setActiveForm(formName);
     setMessage('');
-  };
-
-  const calculatePasswordStrength = (password) => {
-    let strength = 0;
-    if (password.length >= 6) strength += 25;
-    if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 25;
-    if (password.match(/\d/)) strength += 25;
-    if (password.match(/[^a-zA-Z\d]/)) strength += 25;
-    return strength;
   };
 
   const handleLoginSubmit = async (e) => {
@@ -45,9 +34,8 @@ const Auth = ({ onLogin }) => {
       });
 
       localStorage.setItem('token', response.data.access_token);
-      setMessage('✅ Вход выполнен успешно!');
+      setMessage('✅Вход выполнен успешно!');
 
-      // Получаем профиль пользователя
       const profileResponse = await axios.get(`${API_BASE}/profile/`, {
         headers: {
           'Authorization': `Bearer ${response.data.access_token}`
@@ -62,7 +50,7 @@ const Auth = ({ onLogin }) => {
       }, 1000);
 
     } catch (error) {
-      setMessage('❌ Ошибка входа: ' + (error.response?.data?.detail || 'Неверный email или пароль'));
+      setMessage('Ошибка входа: ' + (error.response?.data?.detail || 'Неверный email или пароль'));
     } finally {
       setLoading(false);
     }
@@ -74,13 +62,13 @@ const Auth = ({ onLogin }) => {
     setMessage('');
 
     if (registerData.password !== registerData.confirmPassword) {
-      setMessage('❌ Пароли не совпадают!');
+      setMessage('Пароли не совпадают!');
       setLoading(false);
       return;
     }
 
     if (registerData.password.length < 6) {
-      setMessage('❌ Пароль должен содержать не менее 6 символов!');
+      setMessage('Пароль должен содержать не менее 6 символов!');
       setLoading(false);
       return;
     }
@@ -93,9 +81,8 @@ const Auth = ({ onLogin }) => {
       });
 
       localStorage.setItem('token', response.data.access_token);
-      setMessage('✅ Регистрация завершена! Вход выполнен.');
+      setMessage('✅Регистрация завершена! Вход выполнен.');
 
-      // Получаем профиль пользователя
       const profileResponse = await axios.get(`${API_BASE}/profile/`, {
         headers: {
           'Authorization': `Bearer ${response.data.access_token}`
@@ -110,21 +97,16 @@ const Auth = ({ onLogin }) => {
       }, 1000);
 
     } catch (error) {
-      setMessage('❌ Ошибка регистрации: ' + (error.response?.data?.detail || 'Ошибка сервера'));
+      setMessage('Ошибка регистрации: ' + (error.response?.data?.detail || 'Ошибка сервера'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePasswordChange = (password) => {
-    setRegisterData(prev => ({ ...prev, password }));
-    setPasswordStrength(calculatePasswordStrength(password));
-  };
-
   return (
     <div className="auth-container">
       <div className="auth-box">
-        <div className="logo">^_^</div>
+        <div className="logo">DataCleaner</div>
 
         <div className="form-toggle">
           <button
@@ -142,17 +124,16 @@ const Auth = ({ onLogin }) => {
         </div>
 
         {message && (
-          <div className={`auth-message ${message.includes('❌') ? 'error' : 'success'}`}>
+          <div className={`auth-message ${message.includes('Error') ? 'error' : 'success'}`}>
             {message}
           </div>
         )}
 
-        {/* Форма входа */}
         <form
           className={`auth-form ${activeForm === 'login' ? 'active' : ''}`}
           onSubmit={handleLoginSubmit}
         >
-          <h2 style={{ color: '#18291E' }}>Вход в аккаунт</h2>
+          <h2>Вход в аккаунт</h2>
 
           <div className="input-group">
             <label htmlFor="login-email">Email</label>
@@ -184,15 +165,14 @@ const Auth = ({ onLogin }) => {
           </div>
 
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? '⏳ Загрузка...' : 'Войти'}
+            {loading ? 'Загрузка...' : 'Войти'}
           </button>
 
           <div className="form-footer">
-            <a style={{ color: '#18291E' }} href="#">Забыли пароль?</a>
+            <a href="#">Забыли пароль?</a>
           </div>
         </form>
 
-        {/* Форма регистрации */}
         <form
           className={`auth-form ${activeForm === 'register' ? 'active' : ''}`}
           onSubmit={handleRegisterSubmit}
@@ -231,18 +211,8 @@ const Auth = ({ onLogin }) => {
               placeholder="Не менее 6 символов"
               required
               value={registerData.password}
-              onChange={(e) => handlePasswordChange(e.target.value)}
+              onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
             />
-            <div className="password-strength">
-              <div
-                className="password-strength-bar"
-                style={{
-                  width: `${passwordStrength}%`,
-                  backgroundColor: passwordStrength < 50 ? '#C44536' :
-                                 passwordStrength < 75 ? '#E67E22' : '#27AE60'
-                }}
-              ></div>
-            </div>
           </div>
 
           <div className="input-group">
@@ -259,25 +229,43 @@ const Auth = ({ onLogin }) => {
 
           <div className="checkbox-group">
             <input type="checkbox" id="agree-terms" required />
-            <label style={{ color: '#18291E' }} htmlFor="agree-terms">
+            <label htmlFor="agree-terms">
               Я согласен с условиями использования
             </label>
           </div>
 
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? '⏳ Регистрация...' : 'Зарегистрироваться'}
+            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
           </button>
 
-          <div style={{ color: '#18291E' }} className="form-footer">
+          <div className="form-footer">
             Уже есть аккаунт?{' '}
             <button
               type="button"
-              style={{ color: '#18291E' }}
               className="switch-to-login"
               onClick={() => switchForm('login')}
             >
               Войти
             </button>
+
+                <button
+                  onClick={() => onLogin({
+                    token: 'test-token',
+                    user: { name: 'Пользователь', email: 'test@test.com' }
+                  })}
+                  style={{
+                    marginTop: '10px',
+                    background: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px',
+                    borderRadius: '4px',
+                    width: '100%',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Войти (без авторизации)
+                </button>
           </div>
         </form>
       </div>

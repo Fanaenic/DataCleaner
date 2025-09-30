@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Auth from './Auth';
-import DataCleaner from './DataCleaner';
+import MainApp from './MainApp';
 import './App.css';
 
 function App() {
@@ -8,11 +8,12 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Проверяем есть ли токен при загрузке приложения
     const token = localStorage.getItem('token');
     if (token) {
-      // В реальном проекте здесь была бы проверка токена
-      setUser({ token, user: { name: 'Пользователь', email: 'user@example.com' } });
+      setUser({
+        token,
+        user: { name: 'Пользователь', email: 'user@example.com' }
+      });
     }
     setLoading(false);
   }, []);
@@ -40,7 +41,7 @@ function App() {
       {!user ? (
         <Auth onLogin={handleLogin} />
       ) : (
-        <DataCleaner user={user} onLogout={handleLogout} />
+        <MainApp user={user} onLogout={handleLogout} />
       )}
     </div>
   );
